@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PONDER</title>
+    <style>
+
+        body {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+            margin: 0;
+            cursor: pointer;
+            background: black;
+        }
+
+        .content {
+            width: 90vw;
+            height: 90vh;
+            max-width: 90vh;
+            max-height: 90vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .background-container {
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black url("level.webp") no-repeat center center fixed;
+            background-size: contain;
+            z-index: -1;
+        }
+
+        svg {
+            position: absolute;
+        }
+
+        #player {
+            width: 4px;
+            height: 4px;
+            left:0%; 
+            top:0%; 
+            transform: translate(-50%, -50%);
+        }
+
+        #obstacles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        #navigation {
+            position: absolute;
+            left: 100%;
+            top: 55%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="content">
+        <div class="background-container"></div>
+
+        <svg id="player" style="left:50%; top:50%; transform: translate(-50%, -50%); position: absolute;">
+            <circle cx="2" cy="2" r="2" fill="blue"/>
+        </svg>
+
+        <svg id="obstacles" width="100%" height="100%" viewBox="0 0 63.78 63.78">
+            <path d="M0,0 L63.78,0 L63.78,2 L0,2 Z" fill="red"/>
+            <path d="M0,61.78 L63.78,61.78 L63.78,63.78 L0,63.78 Z" fill="red"/>
+            <path d="M0,0 L2,0 L2,63.78 L0,63.78 Z" fill="red"/>
+            <path d="M61.78,0 L63.78,0 L63.78,63.78 L61.78,63.78 Z" fill="red"/>
+            <path d="M0 0 0 63.78 17.07 63.78 17.07 61.19 29.5 60.5 29.5 57.18 31.89 57.18 33.81 56.69 33.81 53.75 37.34 53.16 37.34 50.42 33.71 49.84 51.14 44.55 51.14 42.4 52.21 42.4 52.21 40.34 54.07 40.34 54.07 38.68 55.74 38.68 55.74 36.72 60.83 36.72 60.83 34.37 63.78 34.37 63.78 0 0 0 Z"/>
+            <path d="M44.87 63.78 L44.87 56.69 52.41 52.48 54.27 53.75 56.62 53.85 56.62 51.79 62.59 48.37 63.78 49.15 63.78 63.78 44.87 63.78 Z"/>
+        </svg>
+
+        <svg id="navigation" width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="20" fill="blue"/>
+        </svg>
+    </div>
+
+
+<script>
+    const playerSvg = document.getElementById('player');
+
+    function teleportPlayerToCenterOfContent() {
+        const content = document.querySelector('.content');
+        const centerX = content.clientWidth * 0.58;
+        const centerY = content.clientHeight * 0.92;
+        playerSvg.style.left = (centerX - playerSvg.clientWidth / 2) + 'px';
+        playerSvg.style.top = (centerY - playerSvg.clientHeight / 2) + 'px';
+    }
+
+    teleportPlayerToCenterOfContent();
+
+
+    window.addEventListener('devicemotion', function (event) {
+        movePlayer(-event.accelerationIncludingGravity.x * 2, event.accelerationIncludingGravity.y * 2);
+    });
+
+    function movePlayer(velocityX, velocityY) {
+        velocityX *= 0.1;
+        velocityY *= 0.1;
+        const playerSvg = document.getElementById('player');
+
+        let playerX = parseFloat(playerSvg.style.left.replace('px', ''));
+        let playerY = parseFloat(playerSvg.style.top.replace('px', ''));
+
+        playerSvg.style.left = (playerX + velocityX) + 'px';
+        if (checkCollision()) {
+            playerSvg.style.left = playerX + 'px';
+        } else {
+            const maxX = window.innerWidth;
+            playerX = Math.max(2, Math.min(playerX + velocityX, maxX - 4));
+        }
+
+        playerSvg.style.top = (playerY + velocityY) + 'px';
+        if (checkCollision()) {
+            playerSvg.style.top = playerY + 'px';
+        } else {
+            const maxY = window.innerHeight;
+            playerY = Math.max(2, Math.min(playerY + velocityY, maxY - 4));
+        }
+
+        playerSvg.style.left = playerX + 'px';
+        playerSvg.style.top = playerY + 'px';
+
+        checkNavigationCollision(); // Check for navigation collision
+    }
+
+    function checkCollision() {
+        const playerSvg = document.getElementById('player');
+        const playerCircle = playerSvg.querySelector('circle');
+        const playerRect = playerSvg.getBoundingClientRect();
+        const playerCenterX = playerRect.left + parseFloat(playerCircle.getAttribute('cx'));
+        const playerCenterY = playerRect.top + parseFloat(playerCircle.getAttribute('cy'));
+
+        const obstacles = document.querySelectorAll('#obstacles path');
+        const svg = document.querySelector('svg');
+        const point = svg.createSVGPoint();
+        point.x = playerCenterX;
+        point.y = playerCenterY;
+
+        for (let obstacle of obstacles) {
+            const transform = obstacle.getScreenCTM().inverse();
+            const transformedPoint = point.matrixTransform(transform);
+            if (obstacle.isPointInFill(transformedPoint)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkNavigationCollision() {
+        const playerSvg = document.getElementById('player');
+        const navigationSvg = document.getElementById('navigation');
+        const playerCircle = playerSvg.querySelector('circle');
+        const playerRect = playerSvg.getBoundingClientRect();
+        const playerCenterX = playerRect.left + parseFloat(playerCircle.getAttribute('cx'));
+        const playerCenterY = playerRect.top + parseFloat(playerCircle.getAttribute('cy'));
+
+        const navigationRect = navigationSvg.getBoundingClientRect();
+
+        if (
+            playerCenterX >= navigationRect.left &&
+            playerCenterX <= navigationRect.right &&
+            playerCenterY >= navigationRect.top &&
+            playerCenterY <= navigationRect.bottom
+        ) {
+            window.location.href = "https://frame-archive.online/";
+        }
+    }
+</script>
+
+</body>
+</html>
