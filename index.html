@@ -185,10 +185,13 @@ function checkNavigationCollision() {
         playerCenterY >= navigationRect.top &&
         playerCenterY <= navigationRect.bottom
     ) {
-        window.history.replaceState({}, '', "/LVL1/");
-        location.reload();
+        const newWindow = window.open('https://framellarchive.github.io/LVL1/', '_blank');
+        if (newWindow) {
+            newWindow.document.documentElement.requestFullscreen();
+        }
     }
 }
+
 </script>
 
 </body>
