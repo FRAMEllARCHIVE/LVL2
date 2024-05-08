@@ -169,25 +169,26 @@
         return false;
     }
 
-    function checkNavigationCollision() {
-        const playerSvg = document.getElementById('player');
-        const navigationSvg = document.getElementById('navigation');
-        const playerCircle = playerSvg.querySelector('circle');
-        const playerRect = playerSvg.getBoundingClientRect();
-        const playerCenterX = playerRect.left + parseFloat(playerCircle.getAttribute('cx'));
-        const playerCenterY = playerRect.top + parseFloat(playerCircle.getAttribute('cy'));
+        function checkNavigationCollision() {
+            const playerSvg = document.getElementById('player');
+            const navigationSvg = document.getElementById('navigation');
+            const playerCircle = playerSvg.querySelector('circle');
+            const playerRect = playerSvg.getBoundingClientRect();
+            const playerCenterX = playerRect.left + parseFloat(playerCircle.getAttribute('cx'));
+            const playerCenterY = playerRect.top + parseFloat(playerCircle.getAttribute('cy'));
 
-        const navigationRect = navigationSvg.getBoundingClientRect();
+            const navigationRect = navigationSvg.getBoundingClientRect();
 
-        if (
-            playerCenterX >= navigationRect.left &&
-            playerCenterX <= navigationRect.right &&
-            playerCenterY >= navigationRect.top &&
-            playerCenterY <= navigationRect.bottom
-        ) {
-            window.location.href = "https://framellarchive.github.io/LVL1/";
+            if (
+                playerCenterX >= navigationRect.left &&
+                playerCenterX <= navigationRect.right &&
+                playerCenterY >= navigationRect.top &&
+                playerCenterY <= navigationRect.bottom
+            ) {
+                // Send a message to the parent document
+                window.parent.postMessage('navigateToLVL1', '*');
+            }
         }
-    }
 
 </script>
 
