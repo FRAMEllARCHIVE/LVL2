@@ -46,6 +46,7 @@
         }
 
         #player {
+            display: none;
             width: 4px;
             height: 4px;
             left:0%; 
@@ -104,6 +105,7 @@ window.addEventListener('load', function() {
         const centerY = content.clientHeight * 0.92;
         playerSvg.style.left = (centerX - playerSvg.clientWidth / 2) + 'px';
         playerSvg.style.top = (centerY - playerSvg.clientHeight / 2) + 'px';
+        playerSvg.style.display = 'block';
     }
 
     teleportPlayerToCenterOfContent();
